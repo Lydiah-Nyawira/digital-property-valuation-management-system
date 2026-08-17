@@ -144,23 +144,39 @@ class UnitDetails(models.Model):
         verbose_name_plural = "Unit Details"        
 
 class ValuationResult(models.Model):
-    METHOD_CHOICES = [
-        ("cost", "Cost Approach"),
-        ("market", "Market/Sales Comparison Approach"),
-        ("income", "Income Approach"),
-    ]
-
     assignment = models.OneToOneField(
         ValuationAssignment, on_delete=models.CASCADE, related_name="result"
     )
-    method_used = models.CharField(max_length=20, choices=METHOD_CHOICES)
-    valuation_amount = models.DecimalField(max_digits=15, decimal_places=2)
-    rate_used = models.DecimalField(
-        max_digits=12, decimal_places=2, blank=True, null=True,
-        help_text="Rate per sqm/unit used in the calculation, if applicable"
+    final_value = models.DecimalField(max_digits=15, decimal_places=2)
+    reconciliation_notes = models.TextField(
+        blank=True, null=True,
+        help_text="Explanation of how the final value was reached, especially if multiple methods were combined"
     )
     valuation_date = models.DateField(auto_now_add=True)
-    notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Valuation for {self.assignment.property.property_code} - {self.valuation_amount}"
+        return f"Valuation for {self.assignment.property.property_code} - {self.final_value}"
+
+class CostApproachDetail(models.Model):
+    valuation_result = models.ForeignKey(
+        ValuationResult, on_delete=models.CASCADE, related_name="cost_approach"
+    )
+    construction_rate = models.DecimalField(max_digits=12, decimal_places=2)
+    depreciation_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    computed_value = models.DecimalField(max_digits=15, decimal_places=2)
+
+    def __str__(self):
+        return f"Cost approach for {self.valuation_result}"
+
+
+class IncomeApproachDetail(models.Model):
+    valuation_result = models.ForeignKey(
+        ValuationResult, on_delete=models.CASCADE, related_name="income_approach"
+    )
+    gross_income = models.DecimalField(max_digits=15, decimal_places=2)
+    expenses = models.DecimalField(max_digits=15, decimal_places=2)
+    cap_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    computed_value = models.DecimalField(max_digits=15, decimal_places=2)
+
+    def __str__(self):
+        return f"Income approach for {self.valuation_result}"
