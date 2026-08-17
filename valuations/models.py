@@ -54,6 +54,92 @@ class InspectionDetails(models.Model):
     def __str__(self):
         return f"Inspection for {self.assignment.property.property_code} on {self.inspection_date}"
 
+# valuations/models.py — add these below your existing classes
+
+class LandDetails(models.Model):
+    inspection = models.OneToOneField(
+        InspectionDetails, on_delete=models.CASCADE, related_name="land_details"
+    )
+    land_use = models.CharField(max_length=100)
+    topography = models.CharField(max_length=100, blank=True, null=True)
+    shape = models.CharField(max_length=100, blank=True, null=True)
+    road_frontage = models.CharField(max_length=100, blank=True, null=True)
+    accessibility = models.CharField(max_length=100, blank=True, null=True)
+    utilities = models.CharField(max_length=255, blank=True, null=True)
+    zoning = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Land details for {self.inspection}"
+
+    class Meta:
+        verbose_name_plural = "Land Details"
+
+
+class BuildingDetails(models.Model):
+    CONSTRUCTION_STATUS_CHOICES = [
+        ("planned", "Planned"),
+        ("under_construction", "Under Construction"),
+        ("complete", "Complete"),
+    ]
+
+    inspection = models.OneToOneField(
+        InspectionDetails, on_delete=models.CASCADE, related_name="building_details"
+    )
+    building_name = models.CharField(max_length=255, blank=True, null=True)
+    building_type = models.CharField(max_length=100)
+    occupancy = models.CharField(max_length=100, blank=True, null=True)
+    construction_status = models.CharField(max_length=30, choices=CONSTRUCTION_STATUS_CHOICES, default="complete")
+    year_built = models.PositiveIntegerField(blank=True, null=True)
+    number_of_storeys = models.PositiveIntegerField(default=1)
+    plinth_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    finishes = models.CharField(max_length=255, blank=True, null=True)
+    condition = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Building details for {self.inspection}"
+
+    class Meta:
+        verbose_name_plural = "Building Details"
+
+
+class FloorDetails(models.Model):
+    building = models.ForeignKey(
+        BuildingDetails, on_delete=models.CASCADE, related_name="floors"
+    )
+    floor_label = models.CharField(max_length=50, help_text="e.g. Ground, 1st, Mezzanine")
+    floor_order = models.PositiveIntegerField(help_text="Used for sorting floors top to bottom")
+    floor_use = models.CharField(max_length=100, blank=True, null=True)
+    floor_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        ordering = ["floor_order"]
+        verbose_name_plural = "Floor Details"
+
+    def __str__(self):
+        return f"{self.floor_label} - {self.building}"
+
+
+class UnitDetails(models.Model):
+    OCCUPANCY_STATUS_CHOICES = [
+        ("vacant", "Vacant"),
+        ("occupied", "Occupied"),
+        ("under_renovation", "Under Renovation"),
+    ]
+
+    floor = models.ForeignKey(
+        FloorDetails, on_delete=models.CASCADE, related_name="units"
+    )
+    unit_number = models.CharField(max_length=50)
+    unit_type = models.CharField(max_length=100, help_text="e.g. 1-bedroom, office, retail")
+    unit_area = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    occupancy_status = models.CharField(max_length=30, choices=OCCUPANCY_STATUS_CHOICES, default="vacant")
+
+    def __str__(self):
+        return f"Unit {self.unit_number} - {self.floor}"
+
+    class Meta:
+        verbose_name_plural = "Unit Details"        
+
 class ValuationResult(models.Model):
     METHOD_CHOICES = [
         ("cost", "Cost Approach"),
