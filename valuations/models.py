@@ -54,6 +54,9 @@ class InspectionDetails(models.Model):
     def __str__(self):
         return f"Inspection for {self.assignment.property.property_code} on {self.inspection_date}"
 
+    class Meta:
+        verbose_name_plural = "Inspection Details"    
+
 # valuations/models.py — add these below your existing classes
 
 class LandDetails(models.Model):
