@@ -49,7 +49,6 @@ class InspectionDetails(models.Model):
     )
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, blank=True, null=True)
     observations = models.TextField(blank=True, null=True, help_text="General notes from the inspection")
-    photos_taken = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Inspection for {self.assignment.property.property_code} on {self.inspection_date}"
