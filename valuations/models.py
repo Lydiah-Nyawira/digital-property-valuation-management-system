@@ -56,7 +56,24 @@ class InspectionDetails(models.Model):
     class Meta:
         verbose_name_plural = "Inspection Details"    
 
-# valuations/models.py — add these below your existing classes
+class InspectionPhoto(models.Model):
+    PHOTO_CATEGORY_CHOICES = [
+        ("access_road", "Access Road / Entrance"),
+        ("subject_property", "Subject Property"),
+        ("adjacent_property", "Adjacent Property"),
+        ("other", "Other"),
+    ]
+
+    inspection = models.ForeignKey(
+        InspectionDetails, on_delete=models.CASCADE, related_name="photos"
+    )
+    photo = models.ImageField(upload_to="inspection_photos/%Y/%m/")
+    category = models.CharField(max_length=30, choices=PHOTO_CATEGORY_CHOICES)
+    caption = models.CharField(max_length=255, blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.inspection}"
 
 class LandDetails(models.Model):
     inspection = models.OneToOneField(
