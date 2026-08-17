@@ -147,15 +147,20 @@ class ValuationResult(models.Model):
     assignment = models.OneToOneField(
         ValuationAssignment, on_delete=models.CASCADE, related_name="result"
     )
-    final_value = models.DecimalField(max_digits=15, decimal_places=2)
+    market_value = models.DecimalField(max_digits=15, decimal_places=2)
+    mortgage_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    insurance_value = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True,
+        help_text="Reinstatement/insurance value"
+    )
     reconciliation_notes = models.TextField(
         blank=True, null=True,
-        help_text="Explanation of how the final value was reached, especially if multiple methods were combined"
+        help_text="Explanation of how the values were reached, especially if multiple methods were combined"
     )
     valuation_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"Valuation for {self.assignment.property.property_code} - {self.final_value}"
+        return f"Valuation for {self.assignment.property.property_code} - {self.market_value}"
 
 class CostApproachDetail(models.Model):
     valuation_result = models.ForeignKey(
