@@ -52,4 +52,26 @@ class InspectionDetails(models.Model):
     photos_taken = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Inspection for {self.assignment.property.property_code} on {self.inspection_date}"        
+        return f"Inspection for {self.assignment.property.property_code} on {self.inspection_date}"
+
+class ValuationResult(models.Model):
+    METHOD_CHOICES = [
+        ("cost", "Cost Approach"),
+        ("market", "Market/Sales Comparison Approach"),
+        ("income", "Income Approach"),
+    ]
+
+    assignment = models.OneToOneField(
+        ValuationAssignment, on_delete=models.CASCADE, related_name="result"
+    )
+    method_used = models.CharField(max_length=20, choices=METHOD_CHOICES)
+    valuation_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    rate_used = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True,
+        help_text="Rate per sqm/unit used in the calculation, if applicable"
+    )
+    valuation_date = models.DateField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Valuation for {self.assignment.property.property_code} - {self.valuation_amount}"
