@@ -94,9 +94,18 @@ class BuildingDetails(models.Model):
     construction_status = models.CharField(max_length=30, choices=CONSTRUCTION_STATUS_CHOICES, default="complete")
     year_built = models.PositiveIntegerField(blank=True, null=True)
     number_of_storeys = models.PositiveIntegerField(default=1)
-    plinth_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    plinth_area = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True,
+        help_text="Plinth area in square metres"
+    )
     finishes = models.CharField(max_length=255, blank=True, null=True)
     condition = models.CharField(max_length=100, blank=True, null=True)
+
+    @property
+    def plinth_area_sqft(self):
+        if self.plinth_area is not None:
+            return round(self.plinth_area * 10.7639, 2)
+        return None
 
     def __str__(self):
         return f"Building details for {self.inspection}"
