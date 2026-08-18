@@ -1,25 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Valuation Assignments</title>
-</head>
-<body>
-    <h1>Valuation Assignments</h1>
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Property</th>
-            <th>Client</th>
-            <th>Status</th>
-            <th>Date Assigned</th>
-        </tr>
-        {% for assignment in assignments %}
-        <tr>
-            <td>{{ assignment.property.property_code }}</td>
-            <td>{{ assignment.client.full_name }}</td>
-            <td>{{ assignment.status }}</td>
-            <td>{{ assignment.date_assigned }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-</body>
-</html>
+{% extends 'valuations/base.html' %}
+
+{% block title %}Assignments{% endblock %}
+
+{% block content %}
+<h1>Valuation Assignments</h1>
+<table>
+    <tr>
+        <th>Property</th>
+        <th>Client</th>
+        <th>Status</th>
+        <th>Date Assigned</th>
+        <th>Actions</th>
+    </tr>
+    {% for assignment in assignments %}
+    <tr>
+        <td>{{ assignment.property.property_code }}</td>
+        <td>{{ assignment.client.full_name }}</td>
+        <td>{{ assignment.status }}</td>
+        <td>{{ assignment.date_assigned }}</td>
+        <td>
+            <a href="{% url 'add_inspection' assignment.id %}">Add Inspection</a> |
+            <a href="{% url 'add_result' assignment.id %}">Add Result</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
