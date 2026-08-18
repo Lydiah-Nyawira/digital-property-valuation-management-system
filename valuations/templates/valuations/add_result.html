@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Valuation Result</title>
+</head>
+<body>
+    <h1>Valuation Result for {{ assignment.property.property_code }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'assignment_list' %}">Back to list</a>
+</body>
+</html>
