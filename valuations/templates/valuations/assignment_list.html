@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Valuation Assignments</title>
+</head>
+<body>
+    <h1>Valuation Assignments</h1>
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Property</th>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Date Assigned</th>
+        </tr>
+        {% for assignment in assignments %}
+        <tr>
+            <td>{{ assignment.property.property_code }}</td>
+            <td>{{ assignment.client.full_name }}</td>
+            <td>{{ assignment.status }}</td>
+            <td>{{ assignment.date_assigned }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
