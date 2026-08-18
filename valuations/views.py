@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
-from .models import ValuationAssignment
-from .forms import ValuationAssignmentForm
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import ValuationAssignment, InspectionDetails
+from .forms import ValuationAssignmentForm, InspectionForm
 
 def assignment_list(request):
     assignments = ValuationAssignment.objects.select_related('property', 'client').all()
@@ -14,4 +14,17 @@ def create_assignment(request):
             return redirect('assignment_list')
     else:
         form = ValuationAssignmentForm()
-    return render(request, 'valuations/create_assignment.html', {'form': form})    
+    return render(request, 'valuations/create_assignment.html', {'form': form})
+
+def add_inspection(request, assignment_id):
+    assignment = get_object_or_404(ValuationAssignment, id=assignment_id)
+    if request.method == 'POST':
+        form = InspectionForm(request.POST)
+        if form.is_valid():
+            inspection = form.save(commit=False)
+            inspection.assignment = assignment
+            inspection.save()
+            return redirect('assignment_list')
+    else:
+        form = InspectionForm()
+    return render(request, 'valuations/add_inspection.html', {'form': form, 'assignment': assignment})       
