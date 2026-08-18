@@ -26,7 +26,7 @@ class Property(models.Model):
     county = models.CharField(max_length=100)
     sub_county = models.CharField(max_length=100)
     coordinates = models.CharField(max_length=100, blank=True, null=True)
-    land_size = models.DecimalField(max_digits=12, decimal_places=2, help_text="Size in acres/hectares")
+    land_size = models.DecimalField(max_digits=12, decimal_places=4, help_text="Land size in hectares")
     property_user = models.CharField(max_length=100, blank=True, null=True)
     property_tenure = models.CharField(max_length=20, choices=TENURE_CHOICES)
     ownership_type = models.CharField(max_length=20, choices=OWNERSHIP_CHOICES)
