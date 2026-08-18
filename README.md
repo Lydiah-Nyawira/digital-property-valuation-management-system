@@ -62,6 +62,7 @@ This project addresses these challenges by creating a centralized digital soluti
 - Python
 - Django
 - Django REST Framework
+- Pillow (image handling for inspection photos)
 
 ### Database
 - PostgreSQL
