@@ -33,6 +33,12 @@ class Property(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def land_size_acres(self):
+        if self.land_size is not None:
+            return round(self.land_size * 2.47105, 2)
+        return None
+
     def __str__(self):
         return f"{self.property_code} - {self.location}"
 
