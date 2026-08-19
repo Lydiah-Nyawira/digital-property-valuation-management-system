@@ -2,7 +2,10 @@
   <label for="coord-input">Paste map link or click map to set location:</label>
   <input type="text" id="coord-input" placeholder="Paste OpenStreetMap link, or click the map below...">
 
-  <div id="map" style="height: 400px; margin-top: 10px;"></div>
+  <div id="map"
+       data-lat="{{ initial_lat|default:'' }}"
+       data-lng="{{ initial_lng|default:'' }}"
+       style="height: 400px; margin-top: 10px;"></div>
 
   <p>Latitude: <span id="lat-display">Not set</span> | Longitude: <span id="lng-display">Not set</span></p>
 
@@ -15,11 +18,16 @@
 
 <script>
   let map, marker;
-  const initialLat = {{ initial_lat|default:"null" }};
-  const initialLng = {{ initial_lng|default:"null" }};
 
   function initMap() {
-    const hasInitial = (initialLat !== null && initialLng !== null);
+    const mapDiv = document.getElementById('map');
+    const latAttr = mapDiv.dataset.lat;
+    const lngAttr = mapDiv.dataset.lng;
+
+    const hasInitial = (latAttr !== '' && lngAttr !== '');
+    const initialLat = hasInitial ? parseFloat(latAttr) : null;
+    const initialLng = hasInitial ? parseFloat(lngAttr) : null;
+
     const startCenter = hasInitial ? [initialLat, initialLng] : [-1.286389, 36.817223];
     const startZoom = hasInitial ? 16 : 7;
 
