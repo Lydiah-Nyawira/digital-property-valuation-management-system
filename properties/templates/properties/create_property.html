@@ -6,7 +6,20 @@
 <h1>Register Property</h1>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+
+    {{ form.title_number.label_tag }} {{ form.title_number }}
+    {{ form.property_code.label_tag }} {{ form.property_code }}
+    {{ form.location.label_tag }} {{ form.location }}
+    {{ form.county.label_tag }} {{ form.county }}
+    {{ form.sub_county.label_tag }} {{ form.sub_county }}
+
+    {% include "properties/partials/location_picker.html" with initial_lat=form.latitude.value initial_lng=form.longitude.value %}
+
+    {{ form.land_size.label_tag }} {{ form.land_size }}
+    {{ form.property_user.label_tag }} {{ form.property_user }}
+    {{ form.property_tenure.label_tag }} {{ form.property_tenure }}
+    {{ form.ownership_type.label_tag }} {{ form.ownership_type }}
+
     <button type="submit">Save</button>
 </form>
 <a class="button-link" href="{% url 'assignment_list' %}">Back to list</a>

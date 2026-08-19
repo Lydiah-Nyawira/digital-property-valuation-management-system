@@ -6,8 +6,8 @@
 
   <p>Latitude: <span id="lat-display">Not set</span> | Longitude: <span id="lng-display">Not set</span></p>
 
-  <input type="hidden" id="id_latitude" name="latitude">
-  <input type="hidden" id="id_longitude" name="longitude">
+  <input type="hidden" id="id_latitude" name="latitude" value="{{ initial_lat|default:'' }}">
+  <input type="hidden" id="id_longitude" name="longitude" value="{{ initial_lng|default:'' }}">
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -15,9 +15,15 @@
 
 <script>
   let map, marker;
+  const initialLat = {{ initial_lat|default:"null" }};
+  const initialLng = {{ initial_lng|default:"null" }};
 
   function initMap() {
-    map = L.map('map').setView([-1.286389, 36.817223], 7); // Nairobi default
+    const hasInitial = (initialLat !== null && initialLng !== null);
+    const startCenter = hasInitial ? [initialLat, initialLng] : [-1.286389, 36.817223];
+    const startZoom = hasInitial ? 16 : 7;
+
+    map = L.map('map').setView(startCenter, startZoom);
 
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -29,6 +35,10 @@
     );
 
     L.control.layers({ "Default": osmLayer, "Satellite": satLayer }).addTo(map);
+
+    if (hasInitial) {
+      setCoords({ lat: initialLat, lng: initialLng });
+    }
 
     map.on('click', (e) => setCoords(e.latlng));
   }
