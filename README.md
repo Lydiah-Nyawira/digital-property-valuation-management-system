@@ -34,6 +34,7 @@ This project addresses these challenges by creating a centralized digital soluti
 - Create and manage property records
 - Store property details
 - Maintain property information history
+- Interactive location picker (map pin, search, or pasted map link)
 
 ### Inspection Management
 - Record inspection details
@@ -66,6 +67,12 @@ This project addresses these challenges by creating a centralized digital soluti
 
 ### Database
 - PostgreSQL
+
+### Mapping / GIS
+- Leaflet.js
+- OpenStreetMap
+- Esri (satellite tiles)
+- staticmap (Python library for generating report map images)
 
 ### Tools
 - Git
@@ -135,14 +142,23 @@ Main resources:
 
 ## Database Design
 
-The system consists of the following main entities:
+The system is built around the following core entities and relationships:
 
-- Users
-- Properties
-- Clients
-- Inspections
-- Comparable Sales
-- Valuation Reports
+- **User** — system users with role-based access (valuers, admins)
+- **Client** — the party requesting a valuation
+- **Property** — core property record (title number, location, county/sub-county, coordinates, land size, tenure, ownership type)
+- **Valuation Assignment** — links a Property + Client to a specific valuation job; defines the valuation type (Full, Hybrid, Drive-By, Desktop)
+- **Inspection Details** — site inspection data tied to an assignment; scope varies by valuation type
+  - **Land Details**, **Building Details**, **Floor Details**, **Unit Details** — property hierarchy, linked through Inspection Details
+  - **Inspection Photo** — categorized site images (access road, subject property, adjacent property, location maps, other)
+- **Valuation Result** — the outcome of a valuation; holds market, mortgage, and insurance values plus reconciliation notes
+  - **Cost Approach Detail**, **Income Approach Detail** — method-specific calculations linked to a Valuation Result
+  - **Comparable Sale** — market approach comparables, one row per comparable property
+- **External Market Evidence** — supporting market data used in valuations
+- **Internal Valuation History** — completed valuations reused as comparables for future assignments
+- **Assignment Comparable** — links comparable properties to a specific valuation assignment
+
+**Relationship summary:** A Client requests a Valuation Assignment for a Property. Depending on the assignment's valuation type, an Inspection Details record (with its Land/Building/Floor/Unit hierarchy and photos) may or may not be created. Each assignment produces a Valuation Result, which can combine multiple valuation methods (Cost, Income, Market) reconciled into a final figure.
 
 ---
 
@@ -156,7 +172,6 @@ The system consists of the following main entities:
 
 Planned improvements include:
 
-- GIS property mapping
 - Automated valuation support
 - Market trend dashboards
 - AI-assisted property analysis
