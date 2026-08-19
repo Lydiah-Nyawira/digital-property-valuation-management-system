@@ -10,6 +10,3 @@ def create_property(request):
     else:
         form = PropertyForm()
     return render(request, 'properties/create_property.html', {'form': form})
-
-def map_test(request):
-    return render(request, 'properties/map_test.html')
