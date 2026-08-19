@@ -61,6 +61,9 @@ class InspectionPhoto(models.Model):
         ("access_road", "Access Road / Entrance"),
         ("subject_property", "Subject Property"),
         ("adjacent_property", "Adjacent Property"),
+        ("map_default", "Location Map — Default/Terrain View"),
+        ("map_satellite", "Location Map — Satellite View"),
+        ("map_directions", "Location Map — Direction from Nearest City/Landmark"),
         ("other", "Other"),
     ]
 
