@@ -1,0 +1,63 @@
+<div class="location-picker">
+  <label for="coord-input">Paste map link or click map to set location:</label>
+  <input type="text" id="coord-input" placeholder="Paste OpenStreetMap link, or click the map below...">
+
+  <div id="map" style="height: 400px; margin-top: 10px;"></div>
+
+  <p>Latitude: <span id="lat-display">Not set</span> | Longitude: <span id="lng-display">Not set</span></p>
+
+  <input type="hidden" id="id_latitude" name="latitude">
+  <input type="hidden" id="id_longitude" name="longitude">
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  let map, marker;
+
+  function initMap() {
+    map = L.map('map').setView([-1.286389, 36.817223], 7); // Nairobi default
+
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const satLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { attribution: 'Tiles © Esri' }
+    );
+
+    L.control.layers({ "Default": osmLayer, "Satellite": satLayer }).addTo(map);
+
+    map.on('click', (e) => setCoords(e.latlng));
+  }
+
+  function setCoords(latlng) {
+    if (marker) {
+      marker.setLatLng(latlng);
+    } else {
+      marker = L.marker(latlng, { draggable: true }).addTo(map);
+      marker.on('dragend', (e) => setCoords(e.target.getLatLng()));
+    }
+    map.panTo(latlng);
+    document.getElementById('id_latitude').value = latlng.lat.toFixed(6);
+    document.getElementById('id_longitude').value = latlng.lng.toFixed(6);
+    document.getElementById('lat-display').textContent = latlng.lat.toFixed(6);
+    document.getElementById('lng-display').textContent = latlng.lng.toFixed(6);
+  }
+
+  document.getElementById('coord-input').addEventListener('paste', () => {
+    setTimeout(() => {
+      const val = document.getElementById('coord-input').value;
+      const match = val.match(/(-?\d+\.\d+)[,/](-?\d+\.\d+)/);
+      if (match) {
+        const latlng = { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        map.setZoom(17);
+        setCoords(latlng);
+      }
+    }, 50);
+  });
+
+  document.addEventListener('DOMContentLoaded', initMap);
+</script>
