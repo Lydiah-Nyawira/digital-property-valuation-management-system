@@ -13,14 +13,19 @@
   <input type="hidden" id="id_longitude" name="longitude" value="{{ initial_lng|default:'' }}">
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
   let map, marker;
 
   function initMap() {
     const mapDiv = document.getElementById('map');
+    if (map) {
+      map.remove();
+      marker = null;
+    }
+    
     const latAttr = mapDiv.dataset.lat;
     const lngAttr = mapDiv.dataset.lng;
 
@@ -33,8 +38,9 @@
 
     map = L.map('map').setView(startCenter, startZoom);
 
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+    const osmLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri',
+      maxZoom: 16
     }).addTo(map);
 
     const satLayer = L.tileLayer(
