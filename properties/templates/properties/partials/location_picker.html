@@ -13,18 +13,34 @@
   <input type="hidden" id="id_longitude" name="longitude" value="{{ initial_lng|default:'' }}">
 </div>
 
+<div class="landmark-picker" style="margin-top: 20px;">
+  <label for="landmark-name">Landmark name:</label>
+  <input type="text" id="landmark-name" placeholder="e.g. St. Mary's Catholic Church">
+
+  <div class="pin-mode-toggle" style="margin: 10px 0;">
+    <label><input type="radio" name="pin-mode" value="property" checked> Set Property</label>
+    <label style="margin-left: 15px;"><input type="radio" name="pin-mode" value="landmark"> Set Landmark</label>
+  </div>
+
+  <p>Distance to property: <span id="distance-display">Not calculated</span></p>
+
+  <input type="hidden" id="id_landmark_lat" name="landmark_lat" value="">
+  <input type="hidden" id="id_landmark_lng" name="landmark_lng" value="">
+  <input type="hidden" id="id_route_distance_km" name="route_distance_km" value="">
+</div>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  let map, marker;
+  let map, marker, landmarkMarker, routeLine;
 
   function initMap() {
     const mapDiv = document.getElementById('map');
     if (map) {
       map.remove();
       marker = null;
-    }
+    }  
     
     const latAttr = mapDiv.dataset.lat;
     const lngAttr = mapDiv.dataset.lng;
@@ -54,7 +70,14 @@
       setCoords({ lat: initialLat, lng: initialLng });
     }
 
-    map.on('click', (e) => setCoords(e.latlng));
+    map.on('click', (e) => {
+      if (getActiveMode() === 'property') {
+        setCoords(e.latlng);
+      } else {
+        setLandmarkCoords(e.latlng);
+      }
+      maybeCalculateRoute();
+    });
   }
 
   function setCoords(latlng) {
@@ -71,6 +94,73 @@
     document.getElementById('lng-display').textContent = latlng.lng.toFixed(6);
   }
 
+  function getActiveMode() {
+    return document.querySelector('input[name="pin-mode"]:checked').value;
+  }
+
+  function setLandmarkCoords(latlng) {
+    if (landmarkMarker) {
+      landmarkMarker.setLatLng(latlng);
+    } else {
+      landmarkMarker = L.marker(latlng, {
+        draggable: true,
+        icon: L.icon({
+          iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+          iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+          shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+          iconSize: [20, 33],
+          iconAnchor: [10, 33]
+        })
+      }).addTo(map);
+      landmarkMarker.on('dragend', (e) => {
+        setLandmarkCoords(e.target.getLatLng());
+        maybeCalculateRoute();
+      });
+    }
+    document.getElementById('id_landmark_lat').value = latlng.lat.toFixed(6);
+    document.getElementById('id_landmark_lng').value = latlng.lng.toFixed(6);
+  }
+
+  function maybeCalculateRoute() {
+    const propLat = document.getElementById('id_latitude').value;
+    const propLng = document.getElementById('id_longitude').value;
+    const landLat = document.getElementById('id_landmark_lat').value;
+    const landLng = document.getElementById('id_landmark_lng').value;
+
+    if (!propLat || !propLng || !landLat || !landLng) {
+      return; // wait until both pins are set
+    }
+
+    const url = `https://router.project-osrm.org/route/v1/driving/${landLng},${landLat};${propLng},${propLat}?overview=full&geometries=geojson`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+          document.getElementById('distance-display').textContent = 'Route not found';
+          return;
+        }
+
+        const route = data.routes[0];
+        const distanceKm = (route.distance / 1000).toFixed(2);
+
+        document.getElementById('distance-display').textContent = `${distanceKm} km`;
+        document.getElementById('id_route_distance_km').value = distanceKm;
+
+        // Draw the route line on the map
+        if (routeLine) {
+          map.removeLayer(routeLine);
+        }
+        routeLine = L.geoJSON(route.geometry, {
+          style: { color: '#c0562f', weight: 4 }
+        }).addTo(map);
+      })
+      .catch(err => {
+        console.error('OSRM routing error:', err);
+        document.getElementById('distance-display').textContent = 'Error calculating route';
+      });
+  }
+  
   document.getElementById('coord-input').addEventListener('paste', () => {
     setTimeout(() => {
       const val = document.getElementById('coord-input').value;

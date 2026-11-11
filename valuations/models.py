@@ -213,3 +213,41 @@ class IncomeApproachDetail(models.Model):
 
     def __str__(self):
         return f"Income approach for {self.valuation_result}"
+
+class ComparableSale(models.Model):
+    valuation_result = models.ForeignKey(
+        ValuationResult,
+        on_delete=models.CASCADE,
+        related_name="comparables",
+    )
+    location = models.CharField(max_length=255)
+    sale_price = models.DecimalField(max_digits=14, decimal_places=2)
+    sale_date = models.DateField()
+    land_size = models.DecimalField(
+        max_digits=10, decimal_places=4,
+        help_text="Hectares",
+    )
+    adjustment_percent = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0,
+        help_text="Net adjustment applied to the sale price, in percent (can be negative)",
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-sale_date"]
+        indexes = [
+            models.Index(fields=["valuation_result"]),
+        ]
+
+    @property
+    def adjusted_price(self):
+        return self.sale_price * (1 + self.adjustment_percent / 100)
+
+    @property
+    def price_per_hectare(self):
+        if self.land_size:
+            return self.adjusted_price / self.land_size
+        return None
+
+    def __str__(self):
+        return f"{self.location} ({self.sale_date})"        

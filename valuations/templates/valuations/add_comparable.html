@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Comparable Sales | DPVMS{% endblock %}
+
+{% block content %}
+<h1>Comparable Sales</h1>
+<p>Valuation result #{{ result.id }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add comparable</button>
+</form>
+
+<h3>Added comparables</h3>
+{% if comparables %}
+<table>
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Sale date</th>
+            <th>Sale price</th>
+            <th>Land size (ha)</th>
+            <th>Adjustment %</th>
+            <th>Adjusted price</th>
+            <th>Price per ha</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in comparables %}
+        <tr>
+            <td>{{ c.location }}</td>
+            <td>{{ c.sale_date }}</td>
+            <td>{{ c.sale_price }}</td>
+            <td>{{ c.land_size }}</td>
+            <td>{{ c.adjustment_percent }}</td>
+            <td>{{ c.adjusted_price|floatformat:2 }}</td>
+            <td>{{ c.price_per_hectare|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No comparables added yet.</p>
+{% endif %}
+{% endblock %}

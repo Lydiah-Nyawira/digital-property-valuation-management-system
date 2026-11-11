@@ -6,4 +6,5 @@ urlpatterns = [
     path('assignments/create/', views.create_assignment, name='create_assignment'),
     path('assignments/<int:assignment_id>/inspection/', views.add_inspection, name='add_inspection'),
     path('assignments/<int:assignment_id>/result/', views.add_result, name='add_result'),
+    path("results/<int:result_id>/comparables/add/", views.add_comparable, name="add_comparable"),
 ]
